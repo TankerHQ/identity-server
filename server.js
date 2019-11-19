@@ -9,14 +9,21 @@ const port = 3001;
 const appID = 'YOUR_APP_ID';
 const appSecret = 'YOUR_APP_SECRET';
 
+const users = {};
+
 app.use(bodyParser.json());
 
 app.post('/identity', async (req, res) => {
-  const id = uuid();
-  const tankerIdentity = await tanker.createIdentity(appID, appSecret, id);
-  const user = {
-    id,
-    tankerIdentity,
+  const email = req.body.email;
+  if (!email) {
+    return res.status(400).json({ error: 'no email provided' });
+  }
+
+  const user = users[email] || {};
+  if (!user.tankerIdentity) {
+    user.id = uuid();
+    user.tankerIdentity = await tanker.createIdentity(appID, appSecret, user.id);
+    users[email] = user;
   }
   res.json(user);
 });
