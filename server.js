@@ -23,9 +23,27 @@ app.post('/identity', async (req, res) => {
   if (!user.tankerIdentity) {
     user.id = uuid();
     user.tankerIdentity = await tanker.createIdentity(appID, appSecret, user.id);
+    user.registered = false;
     users[email] = user;
   }
   res.json(user);
+});
+
+app.patch('/identity', async (req, res) => {
+  const email = req.body.email;
+  if (!email) {
+    return res.status(400).json({ error: 'no email provided' });
+  }
+
+  if (!(email in users)) {
+    return res.status(400).json({ error: 'unkwnown user' });
+  }
+
+  const user = users[email];
+  user.registered = true;
+  users[email] = user;
+
+  res.sendStatus(200);
 });
 
 app.post('/public_identity', async (req, res) => {
@@ -36,7 +54,7 @@ app.post('/public_identity', async (req, res) => {
 
   let identity;
   const user = users[email] || {};
-  if (user.tankerIdentity) {
+  if (user.tankerIdentity && user.registered) {
     identity = user.tankerIdentity;
   } else if (user.provisionalIdentity) {
     identity = user.provisionalIdentity;
