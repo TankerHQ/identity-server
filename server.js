@@ -38,8 +38,11 @@ app.post('/public_identity', async (req, res) => {
   const user = users[email] || {};
   if (user.tankerIdentity) {
     identity = user.tankerIdentity;
+  } else if (user.provisionalIdentity) {
+    identity = user.provisionalIdentity;
   } else {
-    return res.status(400).json({ error: 'unknown user' });
+    identity = await tanker.createProvisionalIdentity(appID, email);
+    users[email] = { provisionalIdentity: identity };
   }
   res.json({ publicIdentity: await tanker.getPublicIdentity(identity) });
 });
