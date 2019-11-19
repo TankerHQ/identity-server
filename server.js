@@ -4,6 +4,8 @@ const bodyParser = require('body-parser');
 
 const app = express();
 const port = 3001;
+const appID = 'YOUR_APP_ID';
+const appSecret = 'YOUR_APP_SECRET';
 
 app.use(bodyParser.json());
 
