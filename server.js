@@ -28,4 +28,20 @@ app.post('/identity', async (req, res) => {
   res.json(user);
 });
 
+app.post('/public_identity', async (req, res) => {
+  const email = req.body.email;
+  if (!email) {
+    return res.status(400).json({ error: 'no email provided' });
+  }
+
+  let identity;
+  const user = users[email] || {};
+  if (user.tankerIdentity) {
+    identity = user.tankerIdentity;
+  } else {
+    return res.status(400).json({ error: 'unknown user' });
+  }
+  res.json({ publicIdentity: await tanker.getPublicIdentity(identity) });
+});
+
 app.listen(port, () => console.log(`Identity server listening on port ${port}!`));
